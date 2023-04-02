@@ -1,0 +1,29 @@
+version: "2"
+services:
+  mongo-shard1:
+    image: mongo
+    container_name: mongo-shard1
+    command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
+  mongo-shard2:
+    image: mongo
+    container_name: mongo-shard2
+    command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
+  mongo-cfg1:
+    image: mongo
+    container_name: mongocfg1
+    command: mongod --configsvr --replSet mongoconf --dbpath /data/db --port 27017
+  mongo-cfg2:
+    image: mongo
+    container_name: mongocfg2
+    command: mongod --configsvr --replSet mongoconf --dbpath /data/db --port 27017
+  mongos:
+    container_name: mongos
+    image: mongo
+    depends_on: 
+      - mongo-cfg1
+      - mongo-cfg2
+    command: mongos --configdb mongoconf/mongocfg1:27017,mongocfg2:27017 --port 27017
+    ports: 
+      - 27019:27017
+    expose:
+      - 27017
